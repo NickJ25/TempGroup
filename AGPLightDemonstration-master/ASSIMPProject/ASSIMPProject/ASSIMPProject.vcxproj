@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnimMesh.cpp" />
+    <ClCompile Include="AnimModel.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PNGProcessor.cpp" />
     <ClCompile Include="rt3d.cpp" />
@@ -26,6 +28,8 @@
     <ClCompile Include="SkyBox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnimMesh.h" />
+    <ClInclude Include="AnimModel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Lights.h" />
     <ClInclude Include="Mesh.h" />

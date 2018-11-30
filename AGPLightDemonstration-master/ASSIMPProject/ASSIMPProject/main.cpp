@@ -13,6 +13,7 @@
 #include "Camera.h"
 #include "libpng16\png.h"
 #include "PNGProcessor.h"
+#include "AnimModel.h"
 
 //rt3d
 #include "rt3d.h"
@@ -40,9 +41,9 @@ GLfloat lastFrame = 0.0f;
 
 DirLight dirLight = {
 	0.5f, 2.0f, 2.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
-	1.0f, 1.0f, 1.0f,
+	0.4f, 0.4f, 0.4f,
+	0.4f, 0.4f, 0.4f,
+	0.4f, 0.4f, 0.4f,
 };
 
 SpotLight light{
@@ -52,9 +53,9 @@ SpotLight light{
 
 	1.0f, 0.09f, 0.032f,
 
-{ 1.0f, 1.0f, 1.0f },
+{ 0.5f, 0.5f, 0.5f },
 { 0.8f, 0.8f, 0.8f },
-{ 1.0f, 1.0f, 1.0f }
+{ 0.5f, 0.5f, 0.5f }
 
 };
 
@@ -62,10 +63,10 @@ PointLight pointLight{
 
 	1.0f, 0.09f, 0.032f,
 
-{ 1.0f, 1.0f, 1.0f },
-{ 0.8f, 0.8f, 0.8f },
-{ 1.0f, 1.0f, 1.0f },
-{ 1.0f, 3.0f, 13.0f }
+{ 0.0f, 0.0f, 0.0f },
+{ 0.0f, 0.0f, 0.0f },
+{ 0.0f, 0.0f, 0.0f },
+{ 1.0f, 3.0f, 0.0f }
 
 };
 
@@ -96,6 +97,8 @@ Model *model1;
 Model *model2;
 Model *model3;
 
+AnimModel animModel1;
+
 //buffer and shader values
 GLuint Framebuffer;
 GLuint depthTexture;
@@ -104,6 +107,7 @@ GLuint depthTexture;
 Shader *furProgram;
 Shader *shadowShader;
 Shader *shader;
+Shader *animShader;
 
 // Fur Settings
 float furLength = 0.2;
@@ -125,6 +129,8 @@ int depthFog = 1;
 // Mesh Index Count
 GLuint meshIndexCount = 0;
 GLuint meshObjects[1];
+
+float testerValue = 10.0f;
 
 //function prototypes
 GLuint LoadTexture(const char *path);
@@ -195,16 +201,58 @@ int initglfw()
 	// Accept fragment if it closer to the camera than the former one
 	glDepthFunc(GL_LESS);
 
-	// Cull triangles which normal is not towards the camera
-	//glEnable(GL_CULL_FACE);
+}
+
+void setMaterial()
+{
+	//glUniform3f(glGetUniformLocation(animShader->Program, "view_pos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+	glUniform1f(glGetUniformLocation(animShader->Program, "material.shininess"), 32.0f);
+	glUniform1f(glGetUniformLocation(animShader->Program, "material.transparency"), 1.0f);
+
+	glUniform3f(glGetUniformLocation(animShader->Program, "view_pos"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+
+}
+void setAnimLights()
+{
+
+	//camera light
+	glUniform3f(glGetUniformLocation(animShader->Program, "light.ambient"), light.ambient[0], light.ambient[1], light.ambient[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "light.diffuse"), light.diffuse[0], light.diffuse[1], light.diffuse[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "light.specular"), light.specular[0], light.specular[1], light.specular[2]);
+	glUniform1f(glGetUniformLocation(animShader->Program, "light.constant"), light.constant);
+	glUniform1f(glGetUniformLocation(animShader->Program, "light.linear"), light.linear);
+	glUniform1f(glGetUniformLocation(animShader->Program, "light.quadratic"), light.quadratic);
+	glUniform3f(glGetUniformLocation(animShader->Program, "light.position"), camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
+	glUniform3f(glGetUniformLocation(animShader->Program, "light.direction"), camera.GetFront().x, camera.GetFront().y, camera.GetFront().z);
+	glUniform1f(glGetUniformLocation(animShader->Program, "light.cutOff"), light.cutOff);
+	glUniform1f(glGetUniformLocation(animShader->Program, "light.outerCutOff"), light.outerCutOff);
+
+	//spotlight
+	glUniform3f(glGetUniformLocation(animShader->Program, "pointLight1.ambient"), pointLight.ambient[0], pointLight.ambient[1], pointLight.ambient[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "pointLight1.diffuse"), pointLight.diffuse[0], pointLight.diffuse[1], pointLight.diffuse[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "pointLight1.specular"), pointLight.specular[0], pointLight.specular[1], pointLight.specular[2]);
+	glUniform1f(glGetUniformLocation(animShader->Program, "pointLight1.constant"), pointLight.constant);
+	glUniform1f(glGetUniformLocation(animShader->Program, "pointLight1.linear"), pointLight.linear);
+	glUniform1f(glGetUniformLocation(animShader->Program, "pointLight1.quadratic"), pointLight.quadratic);
+	glUniform3f(glGetUniformLocation(animShader->Program, "pointLight1.position"), pointLight.position[0], pointLight.position[1], pointLight.position[2]);
+
+
+	glUniform3f(glGetUniformLocation(animShader->Program, "dirLight.direction"), dirLight.direction[0], dirLight.direction[1], dirLight.direction[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "dirLight.ambient"), dirLight.ambient[0], dirLight.ambient[1], dirLight.ambient[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "dirLight.diffuse"), dirLight.diffuse[0], dirLight.diffuse[1], dirLight.diffuse[2]);
+	glUniform3f(glGetUniformLocation(animShader->Program, "dirLight.specular"), dirLight.specular[0], dirLight.specular[1], dirLight.specular[2]);
+
+
 }
 
 void initModels()
 {
 	model1 = new Model("res/models/nanosuit.obj");
 
-	model2 = new Model("res/untitled.obj");
+	model2 = new Model("res/CubeObject/normalledCube.obj");
 
+	animModel1.loadModel("res/character/sassy.dae");
+	animModel1.initShaders(animShader->Program);
 }
 
 int initFrameBuffer()
@@ -297,6 +345,9 @@ int main(int argc, char *argv[])
 	//create a window and initialise GLFW and glew
 	initglfw();
 
+	//shader for handling animated models with bones
+	animShader = new Shader("res/shaders/AnimFog.vert", "res/shaders/AnimFog.frag");
+
 	//load models from files
 	initModels();
 
@@ -308,8 +359,7 @@ int main(int argc, char *argv[])
 
 	// generate the shader for the actual rendering
 	shader = new Shader("res/shaders/fogMap.vert", "res/shaders/fogMap.frag");
-	//shader = new Shader("res/shaders/ShadowMapping.vertexshader", "res/shaders/ShadowMapping.fragmentshader");
-	//shader = new Shader("res/shaders/NormalMapping.vert", "res/shaders/NormalMapping.frag");
+
 	// Fur Shader Program
 	furProgram = new Shader("res/shaders/furShader.vert", "res/shaders/furShader.frag");
 
@@ -321,33 +371,20 @@ int main(int argc, char *argv[])
 
 
 	// load fur textures
-	furTextures[0] = LoadTexture("res/FloorObject/close-up-concrete-creativity-908286.jpg");
+	furTextures[0] = LoadTexture("res/character/LezV2UV.png");
 	furTextures[1] = LoadTexture("res/Textures/leopard.bmp");
 	furTextures[2] = LoadTexture("res/Textures/giraffe.bmp");
 	furTextures[3] = LoadTexture("res/Textures/cow.bmp");
+
 	PNGProcessor pngprocess;
 	furTextures[4] = pngprocess.createFurTextures(383832, 128, 20, furDensity, "furPattern.png");
 
 	SkyBox::Instance()->init("res/FogMap");
 
-	//alternative object loader
-
-	vector<GLfloat> verts;
-	vector<GLfloat> norms;
-	vector<GLfloat> tex_coords;
-	vector<GLuint> indices;
-
-	// Prepare Cube model
-	rt3d::loadObj("res/models/nanosuit.obj", verts, norms, tex_coords, indices);
-	meshIndexCount = indices.size();
-	meshObjects[0] = rt3d::createMesh(verts.size() / 3, verts.data(), nullptr, norms.data(), tex_coords.data(), meshIndexCount, indices.data());
-
 
 
 	do {
 		
-		//glDisable(GL_BLEND);
-		//glEnable(GL_DEPTH_TEST);
 
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
@@ -371,20 +408,26 @@ int main(int argc, char *argv[])
 
 		depthModelMatrix = glm::scale(depthModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
 		glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
-
 		glUniformMatrix4fv(glGetUniformLocation(shadowShader->Program, "depthMVP"), 1, GL_FALSE, glm::value_ptr(depthMVP));
 		model1->DrawVMesh(*shadowShader);
 
 		depthModelMatrix = glm::mat4(1.0);
 		depthModelMatrix = glm::scale(depthModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
-		depthModelMatrix = glm::translate(depthModelMatrix, glm::vec3(0.0f, -18.0f, 0.0f));
+		depthModelMatrix = glm::translate(depthModelMatrix, glm::vec3(10.0f, 1.0f, 10.0f));
+		depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+		glUniformMatrix4fv(glGetUniformLocation(shadowShader->Program, "depthMVP"), 1, GL_FALSE, glm::value_ptr(depthMVP));
+		model1->DrawVMesh(*shadowShader);
+
+		depthModelMatrix = glm::mat4(1.0);
+		depthModelMatrix = glm::scale(depthModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+		depthModelMatrix = glm::translate(depthModelMatrix, glm::vec3(-0.5f, -2.0f, 0.0f));
 
 		depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 		glUniformMatrix4fv(glGetUniformLocation(shadowShader->Program, "depthMVP"), 1, GL_FALSE, glm::value_ptr(depthMVP));
 
 		//draw the shadow for model2 (vertices and indices only)
-		//model2->DrawVMesh(*shadowShader);
+		model2->DrawVMesh(*shadowShader);
+
 		//disable the framebuffer
 		setContext(false, windowWidth, windowHeight);
 
@@ -425,23 +468,35 @@ int main(int argc, char *argv[])
 
 		//reset the model matrix
 		ModelMatrix = glm::mat4(1.0);
-		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.2f, 0.2f, 0.2f));
-		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(0.0f, -18.0f, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(-0.5f, -2.0f, 0.0f));
 		MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "M"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
-
+		//glUniformMatrix3fv(glGetUniformLocation(shader->Program, "viewPos" camera.GetPosition()
 		// draw the second model too
-		//model2->DrawDMesh(*shader);
+		model2->DrawDMesh(*shader);
 		
+		//animated model part
+		animShader->Use();
+		glUniformMatrix4fv(glGetUniformLocation(animShader->Program, "V"), 1, GL_FALSE, &ViewMatrix[0][0]);
+		setMaterial();
+		setAnimLights();
+
+		ModelMatrix = glm::mat4(1.0f);
+		ModelMatrix = glm::translate(ModelMatrix, glm::vec3(4.75f, -0.5f, 3.0f));
+		ModelMatrix = glm::rotate(ModelMatrix, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(0.105f, 0.105f, 0.105f));
+		glUniformMatrix4fv(glGetUniformLocation(animShader->Program, "M_matrix"), 1, GL_FALSE, glm::value_ptr(ModelMatrix));
+		glm::mat4 matr_normals = glm::mat4(glm::transpose(glm::inverse(ModelMatrix)));
+		glUniformMatrix4fv(glGetUniformLocation(animShader->Program, "normals_matrix"), 1, GL_FALSE, glm::value_ptr(matr_normals));
+		MVP = ProjectionMatrix * camera.GetViewMatrix() * ModelMatrix;
+		glUniformMatrix4fv(glGetUniformLocation(animShader->Program, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+
+		animModel1.draw(animShader->Program, true);
+		shader->Use();
+
 		//fur shader part
-		// use the fur shader
-		//glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		//glDepthMask(GL_TRUE);
-
 		furProgram->Use();
 
 		//set the projection
@@ -452,8 +507,8 @@ int main(int argc, char *argv[])
 
 		//create modelview and apply translation
 		glm::mat4 modelview = ModelMatrix * ViewMatrix;
-		modelview = glm::translate(modelview, glm::vec3(0.0f, 1.0f, 10.0f));
-		modelview = ModelMatrix *ViewMatrix;
+		modelview = glm::scale(modelview, glm::vec3(0.2f, 0.2f, 0.2f));
+		modelview = glm::translate(modelview, glm::vec3(10.0f, 1.0f, 10.0f));
 		glUniformMatrix4fv(glGetUniformLocation(furProgram->Program, "modelview"), 1, GL_FALSE, glm::value_ptr(modelview));
 
 		// Pass through the total amount of layers
@@ -463,12 +518,6 @@ int main(int argc, char *argv[])
 		uniformIndex = glGetUniformLocation(furProgram->Program, "furLength");
 		glUniform1f(uniformIndex, furLength);
 		float num = 1;
-
-		/*glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, furTextures[furPatternNum]);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, furTextures[4]);*/
-
 
 
 		for (int i = 0; i < layers; i++) {
@@ -496,8 +545,7 @@ int main(int argc, char *argv[])
 			else furFlowOffset -= 0.00001;
 			glUniform1f(uniformIndex, furFlowOffset * ((float)i / (float)layers));
 
-		//	rt3d::drawIndexedMesh(meshObjects[0], meshIndexCount, GL_TRIANGLES);
-			model1->DrawFurMesh(*furProgram, furTextures[1], furTextures[4]);
+			model1->DrawFurMesh(*furProgram, furTextures[3], furTextures[4]);
 
 		}
 
@@ -600,6 +648,9 @@ void update()
 	if (keys[GLFW_KEY_K]) depthFog = 0;
 	if (keys[GLFW_KEY_L]) depthFog = 1;  // best one
 
+
+	if (keys[GLFW_KEY_V]) testerValue += 25.0f;
+	if (keys[GLFW_KEY_B]) depthFog = 1;  // best one
 }
 
 
