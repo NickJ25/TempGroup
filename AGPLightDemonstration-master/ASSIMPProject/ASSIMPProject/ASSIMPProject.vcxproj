@@ -44,7 +44,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{04C1DF01-B55C-4600-88E1-B31B6306DB70}</ProjectGuid>
     <RootNamespace>ASSIMPProject</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -98,10 +98,10 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Dependencies\glfw-3.2.1.bin.WIN32\include;$(ProjectDir)\Dependencies\SDL2-2.0.8\include;$(ProjectDir)\Dependencies\SOIL2\include;$(ProjectDir)\Dependencies\Assimp\include;$(ProjectDir)\Dependencies\glew-2.1.0\include;$(ProjectDir)\Dependencies\glm;C:\Users\Chris\Desktop\Libpng cancer\_lpng binaries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Dependencies\glfw-3.2.1.bin.WIN32\include;$(ProjectDir)\Dependencies\SDL2-2.0.8\include;$(ProjectDir)\Dependencies\SOIL2\include;$(ProjectDir)\Dependencies\Assimp\include;$(ProjectDir)\Dependencies\glew-2.1.0\include;$(ProjectDir)\Dependencies\glm;$(ProjectDir)\Dependencies\_lpng binaries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Dev\SDL2-2.0.8\VisualC\Win32\Debug;C:\Dev\glfw-3.2.1.bin.WIN32\lib-vc2015;C:\Users\Chris\Desktop\Working ASSIMP Project\ASSIMPProject\ASSIMPProject\SOIL2\lib;C:\Users\Chris\Desktop\Working ASSIMP Project\ASSIMPProject\ASSIMPProject\Assimp\lib;C:\Users\Chris\Downloads\glew-2.1.0\lib\Release\Win32;C:\Users\Chris\Desktop\Libpng cancer\_lpng binaries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\Dependencies\SDL2-2.0.8\VisualC\Win32\Debug;$(ProjectDir)\Dependencies\glfw-3.2.1.bin.WIN32\lib-vc2015;$(ProjectDir)\Dependencies\SOIL2\lib;$(ProjectDir)\Dependencies\Assimp\lib;$(ProjectDir)\Dependencies\glew-2.1.0\lib\Release\Win32;$(ProjectDir)\Dependencies\_lpng binaries\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;SDL2main.lib;SDL2.lib;glew32s.lib;soil2-debug.lib;assimp-vc140-mt.lib;libpng16d.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

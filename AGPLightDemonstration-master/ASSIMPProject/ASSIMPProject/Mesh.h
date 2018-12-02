@@ -64,6 +64,7 @@ public:
         GLuint diffuseNr = 1;
         GLuint specularNr = 1;
 		GLuint normalNr = 1;
+		GLuint occlusionNr = 1;
 
         for( GLuint i = 0; i < this->textures.size( ); i++ )
         {
@@ -79,6 +80,7 @@ public:
             }
             else if( name == "texture_specular" )
             {
+
                 ss << specularNr++; // Transfer GLuint to stream
             }
 			else if (name == "texture_normal")
@@ -86,7 +88,7 @@ public:
 				cout << "called normal map" << endl;
 				ss << normalNr++; // Transfer GLuint to stream
 			}
-            
+	
             number = ss.str( );
             // Now set the sampler to the correct texture unit
             glUniform1i( glGetUniformLocation( shader.Program, ( name + number ).c_str( ) ), i );

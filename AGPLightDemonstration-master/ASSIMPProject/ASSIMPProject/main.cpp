@@ -72,7 +72,7 @@ PointLight pointLight{
 
 //normal map functions
 bool normalMapped = true;
-
+bool parallaxMapped = true;
 
 //glfw values
 bool keys[1024];
@@ -322,6 +322,7 @@ void setLights(Shader* shader)
 	glUniform3f(glGetUniformLocation(shader->Program, "pointLight.position"), pointLight.position[0], pointLight.position[1], pointLight.position[2]);
 
 	glUniform1i(glGetUniformLocation(shader->Program, "normalMapped"), normalMapped);
+	glUniform1i(glGetUniformLocation(shader->Program, "parallaxMapped"), parallaxMapped);
 }
 
 void setContext(bool attach, int windowWidth, int windowHeight)
@@ -640,6 +641,9 @@ void update()
 
 	if (keys[GLFW_KEY_R]) normalMapped = true;
 	if (keys[GLFW_KEY_F]) normalMapped = false;
+
+	if (keys[GLFW_KEY_T]) parallaxMapped = true;
+	if (keys[GLFW_KEY_G]) parallaxMapped = false;
 
 	if (keys[GLFW_KEY_Y]) fogSelector = 0;
 	if (keys[GLFW_KEY_U]) fogSelector = 1;
